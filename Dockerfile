@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 # Enable Apache rewrite
 RUN a2enmod rewrite
@@ -26,10 +26,10 @@ COPY . .
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install Laravel dependencies
-RUN composer install --no-dev --optimize-autoloader
-
 # Fix permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
+
+# Install Laravel dependencies
+RUN composer update && composer install --no-interaction --prefer-dist --optimize-autoloader 
 
 EXPOSE 80
