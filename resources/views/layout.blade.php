@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Hotel TV</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/tv.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/tv.css') }}">
 </head>
 <body>
 
@@ -11,6 +11,6 @@
     @yield('content')
 </div>
 
-<script src="{{ asset('assets/js/remote.js') }}"></script>
+<script src="{{ asset('/js/remote.js') }}"></script>
 </body>
 </html>
