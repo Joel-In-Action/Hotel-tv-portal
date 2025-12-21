@@ -17,3 +17,7 @@ Route::get('/hotel', function () {
 Route::get('/menu', function () {
     return view('menu');
 });
+
+Route::get('/watch/{channel}', function ($channel) {
+    return view('watch', compact('channel'));
+});

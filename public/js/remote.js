@@ -1,20 +1,31 @@
-const focusable = document.querySelectorAll('a.tile');
+const tiles = document.querySelectorAll('.tile');
 let index = 0;
+const columns = 4;
 
-if (focusable.length > 0) {
-    focusable[index].focus();
+if (tiles.length > 0) {
+    tiles[index].focus();
 }
 
 document.addEventListener('keydown', e => {
-    const cols = 3;
-
-    if (e.key === 'ArrowRight') index++;
-    if (e.key === 'ArrowLeft') index--;
-    if (e.key === 'ArrowDown') index += cols;
-    if (e.key === 'ArrowUp') index -= cols;
+    switch (e.key) {
+        case 'ArrowRight':
+            index++;
+            break;
+        case 'ArrowLeft':
+            index--;
+            break;
+        case 'ArrowDown':
+            index += columns;
+            break;
+        case 'ArrowUp':
+            index -= columns;
+            break;
+        default:
+            return;
+    }
 
     if (index < 0) index = 0;
-    if (index >= focusable.length) index = focusable.length - 1;
+    if (index >= tiles.length) index = tiles.length - 1;
 
-    focusable[index].focus();
+    tiles[index].focus();
 });
