@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    text-align: center;
+    padding: 40px;
+}
+
+h1 {
+    margin-bottom: 40px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.tile {
+    background: #1a1a1a;
+    padding: 60px;
+    font-size: 26px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 12px;
+}
+
+.tile:focus {
+    outline: 4px solid #00adee;
+}
+
+.back {
+    display: inline-block;
+    margin-top: 40px;
+}

@@ -1,0 +1,13 @@
+@extends('layout')
+
+@section('content')
+<h1>Welcome to Our Hotel</h1>
+
+<div class="grid">
+    <a href="https://www.youtube.com/tv" class="tile">YouTube</a>
+    <a href="https://www.netflix.com" class="tile">Netflix</a>
+    <a href="/channels" class="tile">Free TV</a>
+    <a href="/hotel" class="tile">Hotel Info</a>
+    <a href="/menu" class="tile">Restaurant Menu</a>
+</div>
+@endsection
