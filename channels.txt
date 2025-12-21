@@ -1,0 +1,9 @@
+IBN TV == http://138.68.138.119/ibn/plugin/Live/?u=admin
+safari Tv == https://tv.garden/tz/xJdfWe2cF6aQkl
+TBC Tv == https://tv.garden/tz/LuoJJuzfa9CVTw
+france24 == https://tv.garden/fr/4CWVkfpOd7mDjB
+Vatican Media == https://www.comunicazione.va/en/servizi/live.html
+
+TVGarden == https://tv.garden/
+AquidTv == https://www.squidtv.net/africa/tanzania/
+VVitv == https://www.vvitv.com/
