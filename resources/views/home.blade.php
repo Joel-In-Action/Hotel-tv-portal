@@ -5,7 +5,7 @@
     <h1>Welcome</h1>
 
     <div class="grid">
-        <a href="https://www.youtube.com/tv" class="tile">YouTube</a>
+        <a href="https://www.youtube.com" class="tile">YouTube</a>
         <a href="https://www.netflix.com" class="tile">Netflix</a>
         <a href="/channels" class="tile">Free TV</a>
         <a href="/hotel" class="tile">Hotel Info</a>

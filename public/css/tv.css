@@ -6,12 +6,22 @@
     --radius: 18px;
 }
 
-body {
+/* body {
     margin: 0;
     background: var(--bg);
     color: #ffffff;
     font-family: Arial, Helvetica, sans-serif;
+} */
+
+body {
+    margin: 0;
+    background: url("/images/bg.jpeg") no-repeat center center fixed;
+    background-size: cover;
+    color: #ffffff;
+    font-family: Arial, Helvetica, sans-serif;
 }
+
+
 
 .container {
     padding: 50px 60px;
@@ -28,6 +38,13 @@ h1 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 35px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* TILE */
