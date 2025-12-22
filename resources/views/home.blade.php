@@ -2,7 +2,7 @@
 
 @section('content')
 <main>
-    <h1>Welcome</h1>
+    <h1><img src="{{asset('/images/logo.png')}}" alt="" srcset=""></h1>
 
     <div class="grid">
         <a href="https://www.youtube.com" class="tile">YouTube</a>
