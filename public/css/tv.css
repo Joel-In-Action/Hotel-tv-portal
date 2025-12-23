@@ -61,6 +61,7 @@ h1 {
 }
 
 
+
 /* Mobile */
 @media (max-width: 768px) {
     .grid {
@@ -69,7 +70,7 @@ h1 {
 }
 
 /* TILE */
-.tile {
+/* .tile {
     background: var(--tile);
     height: 180px;
     border-radius: var(--radius);
@@ -83,7 +84,30 @@ h1 {
     font-size: 26px;
     font-weight: bold;
     transition: all 0.2s ease;
+} */
+
+.tile {
+    background: var(--tile);
+    height: clamp(120px, 18vw, 180px);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: #fff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 26px;
+    font-weight: bold;
+    transition: all 0.2s ease;
 }
+
+.tile img {
+    max-width: 65%;
+    max-height: 65%;
+    object-fit: contain;
+}
+
 
 .tile:focus {
     outline: none;
@@ -92,10 +116,16 @@ h1 {
     box-shadow: 0 0 0 5px var(--focus);
 }
 
-.tile.small {
+/* .tile.small {
     height: 140px;
     font-size: 22px;
+} */
+
+.tile.small {
+    height: clamp(90px, 14vw, 140px);
+    font-size: 22px;
 }
+
 
 /* BACK BUTTON */
 .back {
@@ -106,15 +136,3 @@ h1 {
     width: 240px;
 }
 
-/* .tile {
-  width: 80px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tile img {
-  max-width: 70%;
-  max-height: 70%;
-} */
