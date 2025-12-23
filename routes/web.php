@@ -10,6 +10,10 @@ Route::get('/channels', function () {
     return view('channels');
 });
 
+Route::get('/contacts', function () {
+    return view('contacts');
+});
+
 Route::get('/hotel', function () {
     return view('hotel');
 });

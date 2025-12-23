@@ -17,8 +17,8 @@
         <img src="{{ asset('/images/channel.png') }}" alt="Channels">
     </a>
 
-    <a href="#" class="tile">
-        <img src="{{ asset('/images/contacts.png') }}" alt="Contact">
+    <a href="/contacts" class="tile">
+        <img src="{{ asset('/images/telephone.png') }}" alt="Contact">
     </a>
 
     <a href="/hotel" class="tile small">Hotel Info</a>
