@@ -105,9 +105,9 @@ h1 {
     <div class="overlay-right"></div>
 
     <div class="tv-controls">
-        <button class="tv-btn" onclick="toggleFullscreen(this)">⛶ Fullscreen</button>
-        <button class="tv-btn" onclick="toggleOverlays(this)">👁 Overlays ON</button>
-        <a href="/channels" class="tv-btn">⬅ Back</a>
+        <button class="tile small" onclick="toggleFullscreen(this)">⛶ Fullscreen</button>
+        <button class="tile small" onclick="toggleOverlays(this)">👁 Overlays ON</button>
+        <button class="tile small" onclick="toggleOverlays(this)"><a href="/channels" class="tile small">⬅ Back</a></button>
     </div>
 </div>
 
