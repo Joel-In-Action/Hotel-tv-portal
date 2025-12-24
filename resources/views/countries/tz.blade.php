@@ -4,7 +4,7 @@
 <h1>Free Channels</h1>
 
 <div class="grid">
-    <a href="" class="tile">TBC</a>
+    <a href="/show" class="tile">TBC</a>
     <a href="" class="tile">France</a>
     <a href="" class="tile">Germany</a>
     <a href="" class="tile">Italy</a>

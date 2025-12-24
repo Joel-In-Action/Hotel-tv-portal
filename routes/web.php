@@ -34,3 +34,7 @@ Route::get('/watch/{channel}', function ($channel) {
 Route::get('/tz', function () {
     return view('countries.tz');
 });
+
+Route::get('/show', function () {
+    return view('show');
+});

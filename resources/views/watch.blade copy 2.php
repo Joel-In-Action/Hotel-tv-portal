@@ -147,6 +147,23 @@
 <h1>{{ ucfirst($channel) }}</h1>
 
 @if($channel === 'news')
+<div class="tv-container">
+    <iframe class="tv-frame"
+        src="https://tv.garden/fr/yjR0KcAL5erp0S"
+        allow="autoplay; fullscreen">
+    </iframe>
+
+    <div class="overlay-top"></div>
+    <div class="overlay-left"></div>
+    <div class="overlay-right"></div>
+
+    <div class="tv-controls">
+        <button class="tile small" onclick="toggleFullscreen(this)">⛶ Fullscreen</button>
+        <button class="tile small" onclick="toggleOverlays(this)">👁 Overlays ON</button>
+        <button class="tile small" onclick="toggleOverlays(this)"><a href="/channels" class="tile small">⬅ Back</a></button>
+    </div>
+</div>
+
     {{-- Al Jazeera --}}
     <div class="tv-container">
         <iframe class="tv-frame" src="https://tv.garden/fr/yjR0KcAL5erp0S" allow="autoplay; fullscreen"></iframe>
