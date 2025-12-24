@@ -10,6 +10,10 @@ Route::get('/channels', function () {
     return view('channels');
 });
 
+Route::get('/country', function () {
+    return view('country');
+});
+
 Route::get('/contacts', function () {
     return view('contacts');
 });

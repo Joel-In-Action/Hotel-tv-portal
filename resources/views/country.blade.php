@@ -9,6 +9,6 @@
     <a href="" class="tile">Germany</a>
     <a href="" class="tile">Italy</a>
 
-    <a href="/" class="tile back">⬅ Back</a>
+    <a href="/channels" class="tile back">⬅ Back</a>
 </div>
 @endsection
