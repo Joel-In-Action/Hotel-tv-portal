@@ -2,18 +2,35 @@
 
 @section('content')
 
+<h1>Channels</h1>
+
+<!-- Search form -->
+<form method="GET" action="{{ route('showChannels') }}" style="margin-bottom: 20px;">
+    <input type="text" name="q" placeholder="Search channels..." value="{{ request('q') }}" style="padding: 8px; width: 250px;">
+    <button type="submit" style="padding: 8px;">Search</button>
+</form>
+
 <div class="grid">
-    @foreach ($channels as $channel)
+    @forelse ($channels as $channel)
+        @php
+            // If a search query exists, filter channels by name
+            $query = request('q');
+            if ($query && stripos($channel['name'], $query) === false) {
+                continue;
+            }
+        @endphp
         <a href="{{ route('player', ['url' => $channel['url'], 'name' => $channel['name']]) }}" class="tile">
             @if(!empty($channel['logo']))
                 <img src="{{ $channel['logo'] }}" alt="{{ $channel['name'] }}" class="channel-logo">
             @endif
             <span>{{ $channel['name'] }}</span>
         </a>
-    @endforeach
-
-    <a href="/country" class="tile back">⬅ Back</a>
+    @empty
+        <p>No channels found.</p>
+    @endforelse
 </div>
+
+<a href="/country" class="tile back">⬅ Back</a>
 
 <style>
 .grid {
@@ -41,6 +58,8 @@
 }
 .back {
     background: #bbb;
+    margin-top: 20px;
+    display: inline-block;
 }
 .channel-logo {
     max-width: 100px;
@@ -49,4 +68,5 @@
     object-fit: contain;
 }
 </style>
+
 @endsection

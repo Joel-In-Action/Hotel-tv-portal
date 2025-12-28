@@ -6,46 +6,45 @@ use Illuminate\Support\Facades\Http;
 
 class CountryController extends Controller
 {
-    public function index()
+
+    public function showChannels(Request $request)
     {
         $path = public_path('countries_metadata.json');
+        $countries = json_decode(file_get_contents($path), true);
 
-        if (!file_exists($path)) {
-            abort(404, 'Country metadata not found');
+        $m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
+        $response = Http::timeout(15)->get($m3uUrl);
+
+        if (!$response->ok()) {
+            abort(500, 'Failed to fetch M3U playlist');
         }
 
-        $data = file_get_contents($path);
-        $countries = json_decode($data, true);
+        $channels = $this->parseM3u($response->body(), $countries);
 
-        return view('country', ['countries' => $countries]);
+        // Apply search if provided
+        $search = $request->query('search');
+        if ($search) {
+            $search = strtoupper($search);
+            $channels = array_filter($channels, function($channel) use ($search) {
+                return str_contains(strtoupper($channel['name']), $search);
+            });
+        }
+
+        return view('show', compact('channels', 'countries', 'search'));
     }
 
-    public function showChannels($country_code)
-{
-    $path = public_path('countries_metadata.json');
-    $countries = json_decode(file_get_contents($path), true);
+    public function player(Request $request)
+    {
+        $url = $request->query('url');
+        $name = $request->query('name');
 
-    $m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
-    $response = Http::timeout(15)->get($m3uUrl);
-
-    if (!$response->ok()) {
-        abort(500, 'Failed to fetch M3U playlist');
+        return view('watch', compact('url', 'name'));
     }
 
-    // Pass the country code to filter
-    $channels = $this->parseM3u($response->body(), $countries, $country_code);
-
-    return view('show', compact('channels', 'country_code', 'countries'));
-}
-
-
-    private function parseM3u($m3uText, $countries = [], $filterCountryCode = null)
+    private function parseM3u($m3uText, $countries = [])
 {
     $lines = explode("\n", $m3uText);
     $channels = [];
-
-    // Normalize filter to uppercase for JSON keys
-    $filterCountryCode = $filterCountryCode ? strtoupper($filterCountryCode) : null;
 
     for ($i = 0; $i < count($lines); $i++) {
         $line = trim($lines[$i]);
@@ -54,33 +53,21 @@ class CountryController extends Controller
             $name = trim(explode(",", $line)[1] ?? "");
             $url = trim($lines[$i + 1] ?? "");
 
-            // Try to get tvg-country
+            // Default values
             $countryCode = null;
-            if (str_contains($line, 'tvg-country="')) {
-                $countryCode = strtoupper(explode('"', explode('tvg-country="', $line)[1])[0]);
-            }
-
-            // Determine country info
             $flag = "🏳️";
             $countryName = "Unknown";
 
-            if ($countryCode && isset($countries[$countryCode])) {
-                $countryName = $countries[$countryCode]['country'] ?? "Unknown";
-                $flag = $countries[$countryCode]['flag'] ?? "🏳️";
-            }
-            // Fallback: match country by name in channel title
-            elseif ($filterCountryCode && isset($countries[$filterCountryCode])) {
-                $filterCountryName = strtoupper($countries[$filterCountryCode]['country']);
-                if (str_contains(strtoupper($name), $filterCountryName)) {
-                    $countryCode = $filterCountryCode;
-                    $countryName = $countries[$filterCountryCode]['country'];
-                    $flag = $countries[$filterCountryCode]['flag'] ?? "🏳️";
-                }
+            // Attempt to get country code
+            if (str_contains($line, 'tvg-country="')) {
+                $countryCode = strtolower(explode('"', explode('tvg-country="', $line)[1])[0]);
             }
 
-            // Skip if filtering by country and no match
-            if ($filterCountryCode && $countryCode !== $filterCountryCode) {
-                continue;
+            // Get metadata from countries JSON if exists
+            if ($countryCode && isset($countries[strtoupper($countryCode)])) {
+                $country = $countries[strtoupper($countryCode)];
+                $flag = $country['flag'] ?? "🏳️";
+                $countryName = $country['country'] ?? "Unknown";
             }
 
             $channels[] = [
@@ -97,12 +84,23 @@ class CountryController extends Controller
 }
 
 
-    public function player(Request $request)
-    {
-        $url = $request->query('url');
-        $name = $request->query('name');
+public function allChannels(Request $request)
+{
+    $q = $request->query('q', '');
 
-        return view('watch', compact('url', 'name'));
+    $m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
+    $response = Http::timeout(15)->get($m3uUrl);
+
+    $countries = json_decode(file_get_contents(public_path('countries_metadata.json')), true);
+
+    $channels = $this->parseM3u($response->body(), $countries);
+
+    if ($q) {
+        $channels = array_filter($channels, fn($c) => str_contains(strtolower($c['name']), strtolower($q)));
     }
+
+    return view('channels', compact('channels'));
+}
+
 
 }
