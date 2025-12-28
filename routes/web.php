@@ -25,15 +25,14 @@ Route::get('/menu', function () {
     return view('menu');
 });
 
-Route::get('/watch/{channel}', function ($channel) {
-    return view('watch', compact('channel'));
-});
+// Route::get('/watch/{channel}', function ($channel) {
+//     return view('watch', compact('channel'));
+// });
+Route::get('/player', [CountryController::class, 'player'])->name('player');
 
 
 Route::get('/tz', function () {
     return view('countries.tz');
 });
 
-Route::get('/show', function () {
-    return view('show');
-});
+Route::get('/show/{country_code}', [CountryController::class, 'showChannels']);

@@ -5,7 +5,7 @@
 
 <div class="grid">
     @foreach ($countries as $code => $country)
-        <a href="/show" class="tile">{{ $country['country'] }} ({{ $code }})</a>
+        <a href="/show/{{ $code }}" class="tile">{{ $country['country'] }} ({{ $code }})</a>
     @endforeach
 
     <a href="/country" class="tile back">⬅ Back</a>
