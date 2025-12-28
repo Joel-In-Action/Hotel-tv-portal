@@ -21,63 +21,81 @@ class CountryController extends Controller
     }
 
     public function showChannels($country_code)
-    {
-        $path = public_path('countries_metadata.json');
-        $countries = json_decode(file_get_contents($path), true);
+{
+    $path = public_path('countries_metadata.json');
+    $countries = json_decode(file_get_contents($path), true);
 
-        // Fetch M3U playlist
-        $m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
-        $response = Http::timeout(15)->get($m3uUrl);
+    $m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
+    $response = Http::timeout(15)->get($m3uUrl);
 
-        if (!$response->ok()) {
-            abort(500, 'Failed to fetch M3U playlist');
-        }
-
-        // Parse all channels (like Flask)
-        $channels = $this->parseM3u($response->body(), $countries);
-
-        return view('show', compact('channels', 'country_code', 'countries'));
+    if (!$response->ok()) {
+        abort(500, 'Failed to fetch M3U playlist');
     }
 
-    private function parseM3u($m3uText, $countries = [])
-    {
-        $lines = explode("\n", $m3uText);
-        $channels = [];
+    // Pass the country code to filter
+    $channels = $this->parseM3u($response->body(), $countries, $country_code);
 
-        for ($i = 0; $i < count($lines); $i++) {
-            $line = trim($lines[$i]);
+    return view('show', compact('channels', 'country_code', 'countries'));
+}
 
-            if (str_starts_with($line, "#EXTINF:")) {
-                $name = trim(explode(",", $line)[1] ?? "");
-                $url = trim($lines[$i + 1] ?? "");
 
-                $countryCode = null;
-                $flag = "🏳️";
+    private function parseM3u($m3uText, $countries = [], $filterCountryCode = null)
+{
+    $lines = explode("\n", $m3uText);
+    $channels = [];
 
-                if (str_contains($line, 'tvg-country="')) {
-                    $countryCode = strtolower(explode('"', explode('tvg-country="', $line)[1])[0]);
-                }
+    // Normalize filter to uppercase for JSON keys
+    $filterCountryCode = $filterCountryCode ? strtoupper($filterCountryCode) : null;
 
-                if ($countryCode && isset($countries[strtoupper($countryCode)])) {
-                    $country = $countries[strtoupper($countryCode)];
-                    $flag = $country['flag'] ?? "🏳️";
-                    $countryName = $country['country'] ?? "Unknown";
-                } else {
-                    $countryName = "Unknown";
-                }
+    for ($i = 0; $i < count($lines); $i++) {
+        $line = trim($lines[$i]);
 
-                $channels[] = [
-                    'name' => $name,
-                    'url' => $url,
-                    'country_code' => $countryCode,
-                    'country_name' => $countryName,
-                    'flag' => $flag,
-                ];
+        if (str_starts_with($line, "#EXTINF:")) {
+            $name = trim(explode(",", $line)[1] ?? "");
+            $url = trim($lines[$i + 1] ?? "");
+
+            // Try to get tvg-country
+            $countryCode = null;
+            if (str_contains($line, 'tvg-country="')) {
+                $countryCode = strtoupper(explode('"', explode('tvg-country="', $line)[1])[0]);
             }
-        }
 
-        return $channels;
+            // Determine country info
+            $flag = "🏳️";
+            $countryName = "Unknown";
+
+            if ($countryCode && isset($countries[$countryCode])) {
+                $countryName = $countries[$countryCode]['country'] ?? "Unknown";
+                $flag = $countries[$countryCode]['flag'] ?? "🏳️";
+            }
+            // Fallback: match country by name in channel title
+            elseif ($filterCountryCode && isset($countries[$filterCountryCode])) {
+                $filterCountryName = strtoupper($countries[$filterCountryCode]['country']);
+                if (str_contains(strtoupper($name), $filterCountryName)) {
+                    $countryCode = $filterCountryCode;
+                    $countryName = $countries[$filterCountryCode]['country'];
+                    $flag = $countries[$filterCountryCode]['flag'] ?? "🏳️";
+                }
+            }
+
+            // Skip if filtering by country and no match
+            if ($filterCountryCode && $countryCode !== $filterCountryCode) {
+                continue;
+            }
+
+            $channels[] = [
+                'name' => $name,
+                'url' => $url,
+                'country_code' => $countryCode,
+                'country_name' => $countryName,
+                'flag' => $flag,
+            ];
+        }
     }
+
+    return $channels;
+}
+
 
     public function player(Request $request)
     {
