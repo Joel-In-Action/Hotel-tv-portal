@@ -45,7 +45,8 @@
     background-color: #5555ee;
     transform: scale(1.05);
 }
-</style>
+</style> 
+
 <div class="grid">
     @foreach ($channels as $channel)
         <a href="{{ route('player', ['url' => $channel['url'], 'name' => $channel['name']]) }}" class="tile">
@@ -88,5 +89,8 @@
     object-fit: contain;
 }
 </style>
+
+<a href="/" class="tile back">⬅ Back</a>
+
 
 @endsection
