@@ -4,10 +4,9 @@
 <h1>Free Channels</h1>
 
 <div class="grid">
-    <a href="/show" class="tile">TBC</a>
-    <a href="" class="tile">France</a>
-    <a href="" class="tile">Germany</a>
-    <a href="" class="tile">Italy</a>
+    @foreach ($countries as $code => $country)
+        <a href="/show" class="tile">{{ $country['country'] }} ({{ $code }})</a>
+    @endforeach
 
     <a href="/country" class="tile back">⬅ Back</a>
 </div>

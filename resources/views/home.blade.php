@@ -13,7 +13,7 @@
         <img src="{{ asset('/images/netflix.png') }}" alt="Netflix">
     </a>
 
-    <a href="/channels" class="tile">
+    <a href="/country" class="tile">
         <img src="{{ asset('/images/channel.png') }}" alt="Channels">
     </a>
 

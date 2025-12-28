@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CountryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -10,9 +11,7 @@ Route::get('/channels', function () {
     return view('channels');
 });
 
-Route::get('/country', function () {
-    return view('country');
-});
+Route::get('/country', [CountryController::class, 'index']);
 
 Route::get('/contacts', function () {
     return view('contacts');
