@@ -31,11 +31,13 @@ body::before {
     padding: 50px 60px;
 }
 
-h1 {
-    text-align: center;
-    font-size: 48px;
-    margin-bottom: 50px;
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
 }
+
 
 .hotel {
     text-align: center;
@@ -134,4 +136,102 @@ h1 {
     justify-content: center;
     align-items: center;
     width: 240px;
+}
+
+
+
+
+/* Tablets */
+@media (max-width: 1024px) {
+    body {
+        background-attachment: scroll;
+        min-height: 100vh;
+    }
+
+     .logo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        width: 600px;
+        margin-bottom: 20rem;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    h1 {
+        font-size: 40px;
+    }
+
+    .hotel {
+        font-size: 30px;
+    }
+
+    .tile.small {
+    height: clamp(90px, 14vw, 140px);
+    font-size: 42px;
+}
+}
+
+/* Phones */
+@media (max-width: 768px) {
+     .logo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        width: 600px;
+        margin-bottom: 3rem;
+    }
+    
+    .container {
+        padding: 30px 20px;
+    }
+
+    h1 {
+        font-size: 32px;
+        margin-bottom: 30px;
+    }
+
+    .hotel {
+        font-size: 24px;
+        padding: 20px;
+        margin-bottom: 35px;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+
+    .tile {
+        font-size: 18px;
+        border-radius: 14px;
+    }
+
+    .tile.small {
+        font-size: 16px;
+    }
+
+    .back {
+        width: 100%;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 420px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tile {
+        height: 120px;
+    }
+}
+
+@media (max-width: 768px) {
+       
 }
