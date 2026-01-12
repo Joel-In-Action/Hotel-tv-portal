@@ -84,7 +84,19 @@ class CountryController extends Controller
     }
 
     private $blockedChannels = [
-        '00s Replay'
+        // france
+        '00s Replay', 'like Gecko Chrome/76.0.3809.25 Safari/537.36" group-title="News"', 'France 2 (1080p)', 'France 2 HD (720p)', 'France 3 HD (720p)', 
+        'France 4 HD (720p)', 'France 5 (1080p)', 'France 5 HD (720p)', 'France Inter', 'Franceinfo', 'Motorracing France', 'Rakuten TV Trailers France (720p)',
+        'TV5Monde France Belgique Suisse Monaco (1080p) [Geo-blocked]', 
+
+        // italy
+        '16 Anni e Incinta Italy (720p)', 'Andromeda Italy (720p)', 'Avatar La Leggenda di Aang Italy (720p)', 'BBC Doctor Who Italy (1080p)', 'Catfish TV Show Italy (720p)',
+        'Due Fantagenitori Italy (720p)', 'FailArmy Italy (720p)', 'Geordie Shore Italy (720p)', 'Il Banco dei Pugni Italy (720p)', 'Il Testimone Italy (720p)',
+        'Just for Laughs Italy (720p)', 'Le Sorelle McLeod Italy (720p)', 'Le Sorelle McLeod Italy (720p)', 'MacGyver Italy (720p)', 'Mai Dire Sì Italy (720p)', 
+        'Pimp My Ride Italy (720p)', 'Pluto TV Anime Italy (720p)', 'Pluto TV Cinema Italiano Italy (720p)', 'Pluto TV Cinema Italiano Italy (720p)', 'Pluto TV Crime Italy (720p)', 
+        'Pluto TV Documentary Italy (720p)', 'Pluto TV Film Azione Italy (720p)', 'Pluto TV Film Azione Italy (720p)', 'Pluto TV Film Classici Italy (720p)', 
+        'Pluto TV Film Commedia Italy (720p)', 'Pluto TV Film Drama Italy (720p)', 'Pluto TV Film Italy (720p)', 'Pluto TV Film Romantici Italy (720p)', 
+        'Pluto TV Film Thriller Italy (720p)', 'Pluto TV Horror Italy (720p)', ''
     ];
 
     public function allChannels(Request $request)
@@ -97,6 +109,15 @@ class CountryController extends Controller
         $countries = json_decode(file_get_contents(public_path('countries_metadata.json')), true);
 
         $channels = $this->parseM3u($response->body(), $countries);
+
+
+        // ❌ Block channels starting with "Pluto"
+        $channels = array_filter($channels, function ($channel) {
+            return !str_starts_with(
+                strtolower($channel['name']),
+                'pluto'
+            );
+        });
 
         $channels = array_filter($channels, function($channel) {
             return !in_array($channel['name'], $this->blockedChannels);
