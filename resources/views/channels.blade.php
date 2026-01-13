@@ -47,7 +47,9 @@
 }
 </style> 
 
-<h1>All Channels</h1>
+<center>
+    <h1>All Channels</h1>
+</center>
 <form method="GET" action="{{ route('channels') }}" class="search-form">
     <input type="text" name="q" placeholder="Search channels..." value="{{ request('q') }}" class="search-input">
     <button type="submit" class="search-button">🔍</button>

@@ -37,6 +37,7 @@ body::before {
     justify-content: center;
     align-items: center;
     margin: 0 auto;
+    margin-bottom: 1rem;
 }
 
 
@@ -143,7 +144,7 @@ body::before {
 
 
 /* Tablets */
-@media (max-width: 1024px) {
+/* @media (max-width: 1024px) {
     body {
         background-attachment: scroll;
         min-height: 100vh;
@@ -175,7 +176,7 @@ body::before {
     height: clamp(90px, 14vw, 140px);
     font-size: 42px;
 }
-}
+} */
 
 /* Phones */
 @media (max-width: 768px) {
