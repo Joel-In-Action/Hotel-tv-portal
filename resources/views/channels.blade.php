@@ -1,19 +1,19 @@
 @extends('layout')
 
 @section('content')
-
-<h1>All Channels</h1>
-<form method="GET" action="{{ route('channels') }}" class="search-form">
-    <input type="text" name="q" placeholder="Search channels..." value="{{ request('q') }}" class="search-input">
-    <button type="submit" class="search-button">🔍</button>
-</form>
-
 <style>
 .search-form {
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
 }
+
+.tile:focus,
+.search-input:focus {
+    outline: 3px solid #6666ff;
+    outline-offset: 4px;
+}
+
 
 .search-input {
     padding: 10px 15px;
@@ -47,6 +47,12 @@
 }
 </style> 
 
+<h1>All Channels</h1>
+<form method="GET" action="{{ route('channels') }}" class="search-form">
+    <input type="text" name="q" placeholder="Search channels..." value="{{ request('q') }}" class="search-input">
+    <button type="submit" class="search-button">🔍</button>
+</form>
+
 <div class="grid">
     @foreach ($channels as $channel)
         <a href="{{ route('player', ['url' => $channel['url'], 'name' => $channel['name']]) }}" class="tile">
@@ -57,38 +63,6 @@
         </a>
     @endforeach
 </div>
-
-<style>
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
-.tile {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    background: #f1f1f1;
-    text-decoration: none;
-    color: #333;
-    border-radius: 8px;
-    font-weight: bold;
-    text-align: center;
-    transition: background 0.2s;
-}
-.tile:hover {
-    background: #ddd;
-}
-.channel-logo {
-    max-width: 100px;
-    max-height: 60px;
-    margin-bottom: 8px;
-    object-fit: contain;
-}
-</style>
 
 <a href="/" class="tile back">⬅ Back</a>
 

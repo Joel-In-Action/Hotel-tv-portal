@@ -8,7 +8,9 @@
     Your browser does not support the video tag.
 </video>
 
-<a href="{{ url()->previous() }}" class="back" style="display: inline-block; margin-top: 20px;">⬅ Back</a>
+<!-- <a href="{{ url()->previous() }}" class="back" style="display: inline-block; margin-top: 20px;">⬅ Back</a> -->
+<a href="{{ url()->previous() }}" class="tile back">⬅ Back</a>
+
 
 <!-- Include HLS.js from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
