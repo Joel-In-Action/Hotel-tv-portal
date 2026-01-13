@@ -113,7 +113,9 @@ class CountryController extends Controller
         'ABC 9 Orlando FL (WFTV) (720p)', 'Andorra TV (1080p)', 'Corporation de Télévision Brandon (CTB TV)', 'Kino Barrandov (720p)', 'MBC Andong (안동 MBC) (360p) [Not 24/7]',
         'Resplandor TV (720p)', 'Shandong Education TV', 'SuperChannel Orlando (WACX-DT1) (720p)','Anytime TV (1080p)', 'Class CNBC', 'CNBC (720p)', 'CNBC Africa (480p)',
         'CNBC Indonesia (720p)', 'CNBC TV18 Prime HD (1080p)', 'GNF TV (576p)', 'GOD TV Africa (576p)', 'Hilaal TV (576p)', 'Homebase TV (576p) [Not 24/7]', 'Hope4Life TV (720p)',
-        'Hope Channel Australia (1080p)', 'Hope Channel Bulgaria', 'Hope Channel Ghana (480p)', 'Hope Channel Norge (720p)', 'LN24SA (1080p)', 'LN247 (1080p)',
+        'Hope Channel Australia (1080p)', 'Hope Channel Bulgaria', 'Hope Channel Ghana (480p)', 'Hope Channel Norge (720p)', 'LN24SA (1080p)', 'LN247 (1080p)', '2M Monde', '3HD',
+        'como Gecko) Chrome/112.0.0.0 Mobile Safari/537.36" group-title="News"', '3Cat Exclusiu 2 (1080p) [Geo-blocked]', '3Cat Exclusiu 3 (1080p) [Geo-blocked]',
+        '3ABN TV Uganda (720p) [Not 24/7]', '8 Out of 10 Cats (1080p) [Geo-blocked]', 
 
         // another italy
         'Alkarma TV Praise (720p) [Not 24/7]', 'Channel 7 Ukraine (720p)', 'Charlotte aux Fraises', 'Little House on the Prairie', 'Praise Jesus Tower TV (480p)', 'Rai 1 HD (720p)', 
@@ -157,6 +159,20 @@ class CountryController extends Controller
             return !str_starts_with(
                 strtolower($channel['name']),
                 'pluto'
+            );
+        });
+
+        $channels = array_filter($channels, function ($channel) {
+            return !str_contains(
+                strtolower($channel['name']),
+                'gecko'
+            );
+        });
+
+        $channels = array_filter($channels, function ($channel) {
+            return !str_contains(
+                strtolower($channel['name']),
+                'blocked'
             );
         });
 
