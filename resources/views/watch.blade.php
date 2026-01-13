@@ -2,11 +2,13 @@
 
 @section('content')
 
-<h1>{{ $name }}</h1>
-
-<video id="video" controls autoplay style="width: 100%; max-width: 800px;" poster="">
-    Your browser does not support the video tag.
-</video>
+<div>
+    <h1>{{ $name }}</h1>
+    
+    <video id="video" controls autoplay style="width: 100%; max-width: 800px;" poster="">
+        Your browser does not support the video tag.
+    </video>
+</div>
 
 <!-- <a href="{{ url()->previous() }}" class="back" style="display: inline-block; margin-top: 20px;">⬅ Back</a> -->
 <a href="{{ url()->previous() }}" class="tile back">⬅ Back</a>

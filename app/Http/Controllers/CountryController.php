@@ -10,16 +10,27 @@ class CountryController extends Controller
     public function showChannels(Request $request)
     {
         $path = public_path('countries_metadata.json');
+        $path1 = public_path('index.m3u');
         $countries = json_decode(file_get_contents($path), true);
+        $m3uUrl = json_decode(file_get_contents($path1), true);
 
-        $m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
-        $response = Http::timeout(15)->get($m3uUrl);
+        // $m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
 
-        if (!$response->ok()) {
-            abort(500, 'Failed to fetch M3U playlist');
+        if (!file_exists($path1)) {
+            abort(500, 'index.m3u not found');
         }
 
-        $channels = $this->parseM3u($response->body(), $countries);
+        // ✅ Read as plain text
+        $m3uText = file_get_contents($path1);
+
+        $countries = json_decode(
+            file_get_contents(public_path('countries_metadata.json')),
+            true
+        );
+
+        // ✅ Parse directly
+        $channels = $this->parseM3u($m3uText, $countries);
+
 
         // Apply search if provided
         $search = $request->query('search');
@@ -103,13 +114,22 @@ class CountryController extends Controller
     {
         $q = $request->query('q', '');
 
-        $m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
-        $response = Http::timeout(15)->get($m3uUrl);
+       $path1 = public_path('index.m3u');
 
-        $countries = json_decode(file_get_contents(public_path('countries_metadata.json')), true);
+        if (!file_exists($path1)) {
+            abort(500, 'index.m3u not found');
+        }
 
-        $channels = $this->parseM3u($response->body(), $countries);
+        // ✅ Read as plain text
+        $m3uText = file_get_contents($path1);
 
+        $countries = json_decode(
+            file_get_contents(public_path('countries_metadata.json')),
+            true
+        );
+
+        // ✅ Parse directly
+        $channels = $this->parseM3u($m3uText, $countries);
 
         // ❌ Block channels starting with "Pluto"
         $channels = array_filter($channels, function ($channel) {
