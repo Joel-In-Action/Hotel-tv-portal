@@ -7,7 +7,7 @@
 }
 
 body {
-    cursor: none;
+    /* cursor: none; */
     margin: 0;
     color: #ffffff;
     font-family: Arial, Helvetica, sans-serif;
@@ -40,7 +40,6 @@ body::before {
     margin-bottom: 1rem;
 }
 
-
 .hotel {
     text-align: center;
     font-size: 36px;
@@ -56,15 +55,12 @@ body::before {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-
 /* GRID */
 .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 35px;
 }
-
-
 
 /* Mobile */
 @media (max-width: 768px) {

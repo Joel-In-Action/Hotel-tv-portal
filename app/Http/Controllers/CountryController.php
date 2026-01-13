@@ -107,7 +107,28 @@ class CountryController extends Controller
         'Pimp My Ride Italy (720p)', 'Pluto TV Anime Italy (720p)', 'Pluto TV Cinema Italiano Italy (720p)', 'Pluto TV Cinema Italiano Italy (720p)', 'Pluto TV Crime Italy (720p)', 
         'Pluto TV Documentary Italy (720p)', 'Pluto TV Film Azione Italy (720p)', 'Pluto TV Film Azione Italy (720p)', 'Pluto TV Film Classici Italy (720p)', 
         'Pluto TV Film Commedia Italy (720p)', 'Pluto TV Film Drama Italy (720p)', 'Pluto TV Film Italy (720p)', 'Pluto TV Film Romantici Italy (720p)', 
-        'Pluto TV Film Thriller Italy (720p)', 'Pluto TV Horror Italy (720p)', ''
+        'Pluto TV Film Thriller Italy (720p)', 'Pluto TV Horror Italy (720p)', 
+
+        // random guesses
+        'ABC 9 Orlando FL (WFTV) (720p)', 'Andorra TV (1080p)', 'Corporation de Télévision Brandon (CTB TV)', 'Kino Barrandov (720p)', 'MBC Andong (안동 MBC) (360p) [Not 24/7]',
+        'Resplandor TV (720p)', 'Shandong Education TV', 'SuperChannel Orlando (WACX-DT1) (720p)','Anytime TV (1080p)', 'Class CNBC', 'CNBC (720p)', 'CNBC Africa (480p)',
+        'CNBC Indonesia (720p)', 'CNBC TV18 Prime HD (1080p)', 'GNF TV (576p)', 'GOD TV Africa (576p)', 'Hilaal TV (576p)', 'Homebase TV (576p) [Not 24/7]', 'Hope4Life TV (720p)',
+        'Hope Channel Australia (1080p)', 'Hope Channel Bulgaria', 'Hope Channel Ghana (480p)', 'Hope Channel Norge (720p)', 'LN24SA (1080p)', 'LN247 (1080p)',
+
+        // another italy
+        'Alkarma TV Praise (720p) [Not 24/7]', 'Channel 7 Ukraine (720p)', 'Charlotte aux Fraises', 'Little House on the Prairie', 'Praise Jesus Tower TV (480p)', 'Rai 1 HD (720p)', 
+        'Rai 2 (576p) [Geo-blocked]', 'Rai 2 HD', 'Rai 4 (576p) [Geo-blocked]', 'RAI 4K [Geo-blocked]', 'Rai 5 (576p) [Geo-blocked]', 'Rai Gulp (1080p)', 'Rai Gulp HD', 'RAI Italia Asia (576p)', 
+        'Rai Movie (576p) [Geo-blocked]', 'Rai News 24 (720p)', 'Rai News 24 HD', 'Rai Premium (1080p)', 'Rai Scuola (576p) [Geo-blocked]', 'Rai Scuola HD', 'Rai Sport 2', 'Rai Sport HD',
+        'Rai Storia (576p) [Geo-blocked]', 'Rai Storia HD', 'Rai Yoyo (1080p)', 'Raia TV (720p) [Not 24/7]', 'Rakuten TV Trailers Germany (1080p)', 'Rakuten TV Trailers Italy (1080p)',
+        'Rakuten TV Trailers Spain (1080p)', 'Rakuten TV Trailers UK (1080p)', 'TVR Craiova (1080p) [Geo-blocked]', 'Rakuten TV Family Movies Italy (1080p)', 'Rakuten TV Asian Cinema Italy (1080p)',
+        'Renegade Italy (720p)', 'Scherzi e risate Italy (720p)', 'Settimo Cielo Italy (720p)', 'South Park Italy (720p)', 'Squadra Speciale Cobra 11 Italy (720p)',
+        'Super! Brothers and Sisters Italy (720p)', 'Super! iCarly Italy (720p)', 'Super! Pop Italy (720p)', 'Super! Rugrats Italy (720p)', 'Super! Star Italy (720p)', 
+        'Super! Victorious Italy (720p)', 'Teen Mom Italy (720p)', 'Teenage Mutant Ninja Turtles Italy (720p)', 'VH1+ Music Legends Italy (720p)', 'VH1+ Rock Italy (720p)', 
+        'World Poker Tour Italy (720p)', 
+
+        // german
+        'Comedy & Shows Germany (1080p)', 'Germany Shore', 'Hope Channel German (1080p)', 'MyTime Movie Network Germany (1080p)', 'Nick Germany (1080p) [Geo-blocked]',
+        'QVC 2 Germany (540p)', 'QVC Style Germany (540p)', ''
     ];
 
     public function allChannels(Request $request)
