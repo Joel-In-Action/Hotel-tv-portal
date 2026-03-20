@@ -115,7 +115,7 @@ class CountryController extends Controller
         'CNBC Indonesia (720p)', 'CNBC TV18 Prime HD (1080p)', 'GNF TV (576p)', 'GOD TV Africa (576p)', 'Hilaal TV (576p)', 'Homebase TV (576p) [Not 24/7]', 'Hope4Life TV (720p)',
         'Hope Channel Australia (1080p)', 'Hope Channel Bulgaria', 'Hope Channel Ghana (480p)', 'Hope Channel Norge (720p)', 'LN24SA (1080p)', 'LN247 (1080p)', '2M Monde', '3HD',
         'como Gecko) Chrome/112.0.0.0 Mobile Safari/537.36" group-title="News"', '3Cat Exclusiu 2 (1080p) [Geo-blocked]', '3Cat Exclusiu 3 (1080p) [Geo-blocked]',
-        '3ABN TV Uganda (720p) [Not 24/7]', '8 Out of 10 Cats (1080p) [Geo-blocked]', 
+        '3ABN TV Uganda (720p) [Not 24/7]', '8 Out of 10 Cats (1080p) [Geo-blocked]', '2STV', '1Music Channel Hungary (576p)',
 
         // another italy
         'Alkarma TV Praise (720p) [Not 24/7]', 'Channel 7 Ukraine (720p)', 'Charlotte aux Fraises', 'Little House on the Prairie', 'Praise Jesus Tower TV (480p)', 'Rai 1 HD (720p)', 

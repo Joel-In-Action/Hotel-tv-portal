@@ -23,8 +23,8 @@
 
     <a href="/hotel" class="tile small">Hotel Info</a>
     <a href="#" class="tile small">Spa</a>
-    <a href="/menu" class="tile small">Restaurant</a>
-    <a href="#" class="tile small">Tour</a>
+    <a href="/menu" class="tile small">F & B Services</a>
+    <a href="#" class="tile small">Recreation</a>
 </div>
 
 </main>
