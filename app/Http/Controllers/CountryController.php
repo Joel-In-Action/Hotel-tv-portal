@@ -1,189 +1,203 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Services\ChannelCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class CountryController extends Controller
 {
-
-    public function showChannels(Request $request)
+    public function __construct(private ChannelCatalog $catalog)
     {
-        $path = public_path('countries_metadata.json');
-        $path1 = public_path('index.m3u');
-        $countries = json_decode(file_get_contents($path), true);
-        $m3uUrl = json_decode(file_get_contents($path1), true);
+    }
 
-        // $m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
+    public function countries(Request $request)
+    {
+        $onlyWorking = ! $request->boolean('all');
+        $countries = $this->catalog->countries($onlyWorking);
+        $q = trim((string) $request->query('q', ''));
 
-        if (!file_exists($path1)) {
-            abort(500, 'index.m3u not found');
+        if ($q !== '') {
+            $countries = array_values(array_filter($countries, function ($country) use ($q) {
+                return str_contains(strtolower($country['name'].' '.$country['code']), strtolower($q));
+            }));
         }
 
-        // ✅ Read as plain text
-        $m3uText = file_get_contents($path1);
+        return view('channels', [
+            'countries' => $countries,
+            'q' => $q,
+            'has_playlist' => $this->catalog->hasPlaylist(),
+            'total_channels' => count($this->catalog->channels($onlyWorking)),
+            'health_ready' => $this->catalog->healthReady(),
+            'only_working' => $onlyWorking,
+        ]);
+    }
 
-        $countries = json_decode(
-            file_get_contents(public_path('countries_metadata.json')),
-            true
-        );
+    public function showChannels(Request $request, string $country_code)
+    {
+        $onlyWorking = ! $request->boolean('all');
+        $q = trim((string) $request->query('q', ''));
+        $page = (int) $request->query('page', 1);
+        $filtered = $this->catalog->forCountry($country_code, $q, $onlyWorking);
+        $result = $this->catalog->page($filtered, $page);
+        $meta = collect($this->catalog->countries($onlyWorking))->firstWhere('code', strtoupper($country_code));
 
-        // ✅ Parse directly
-        $channels = $this->parseM3u($m3uText, $countries);
-
-
-        // Apply search if provided
-        $search = $request->query('search');
-        if ($search) {
-            $search = strtoupper($search);
-            $channels = array_filter($channels, function($channel) use ($search) {
-                return str_contains(strtoupper($channel['name']), $search);
-            });
-        }
-
-        return view('show', compact('channels', 'countries', 'search'));
+        return view('show', [
+            'channels' => $result['data'],
+            'page' => $result['page'],
+            'pages' => $result['pages'],
+            'total' => $result['total'],
+            'country' => $meta ?? [
+                'code' => strtoupper($country_code),
+                'name' => strtoupper($country_code) === 'ALL' ? 'All channels' : strtoupper($country_code),
+                'flag' => '🏳️',
+            ],
+            'q' => $q,
+            'has_playlist' => $this->catalog->hasPlaylist(),
+            'health_ready' => $this->catalog->healthReady(),
+            'only_working' => $onlyWorking,
+        ]);
     }
 
     public function player(Request $request)
     {
-        $url = $request->query('url');
-        $name = $request->query('name');
+        $url = (string) $request->query('url', '');
+        $name = (string) $request->query('name', 'Channel');
+        $country = strtoupper((string) $request->query('country', ''));
+        $index = (int) $request->query('i', 0);
 
-        return view('watch', compact('url', 'name'));
+        if (! preg_match('#^https?://#i', $url)) {
+            abort(400, 'Missing stream url');
+        }
+
+        $list = $country !== '' ? $this->catalog->forCountry($country) : [];
+        $prev = $index > 0 && isset($list[$index - 1]) ? $list[$index - 1] : null;
+        $next = isset($list[$index + 1]) ? $list[$index + 1] : null;
+
+        return view('watch', [
+            'url' => $url,
+            'name' => $name,
+            'kind' => str_contains(strtolower($url), '.m3u8') ? 'hls' : (preg_match('/\.ts(\?|$)/i', $url) ? 'ts' : 'file'),
+            'country' => $country,
+            'index' => $index,
+            'prev' => $prev,
+            'next' => $next,
+            'back' => $country !== '' ? route('country.show', $country) : route('channels'),
+        ]);
     }
 
-    private function parseM3u($m3uText, $countries = [])
+    public function proxy(Request $request)
     {
-        $lines = explode("\n", $m3uText);
-        $channels = [];
+        $url = (string) $request->query('url', '');
+        $this->assertPublicHttp($url);
 
-        for ($i = 0; $i < count($lines); $i++) {
-            $line = trim($lines[$i]);
+        try {
+            $upstream = Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (SMART-TV; Linux; Tizen 6.5) AppleWebKit/537.36 HotelTV/1.0',
+                'Accept' => '*/*',
+            ])->withOptions([
+                'allow_redirects' => true,
+                'timeout' => 20,
+            ])->get($url);
+        } catch (\Throwable $e) {
+            abort(502, 'Stream provider did not respond');
+        }
 
-            if (str_starts_with($line, "#EXTINF:")) {
-                $name = trim(explode(",", $line)[1] ?? "");
-                $url = trim($lines[$i + 1] ?? "");
+        if (! $upstream->successful()) {
+            abort($upstream->status() ?: 502, 'Stream provider rejected the request');
+        }
 
-                // Default values
-                $countryCode = null;
-                $flag = "🏳️";
-                $countryName = "Unknown";
+        $body = $upstream->body();
+        $type = strtolower($upstream->header('Content-Type') ?? '');
+        $path = strtolower(parse_url($url, PHP_URL_PATH) ?? '');
+        $isPlaylist = str_contains($type, 'mpegurl')
+            || str_contains($type, 'm3u')
+            || str_ends_with($path, '.m3u8')
+            || str_starts_with(ltrim($body), '#EXTM3U');
 
-                // Attempt to get country code
-                if (str_contains($line, 'tvg-country="')) {
-                    $countryCode = strtolower(explode('"', explode('tvg-country="', $line)[1])[0]);
-                }
+        if ($isPlaylist) {
+            return response($this->rewritePlaylist($body, $url), 200, [
+                'Content-Type' => 'application/vnd.apple.mpegurl',
+                'Cache-Control' => 'no-cache',
+                'Access-Control-Allow-Origin' => '*',
+            ]);
+        }
 
-                // Get metadata from countries JSON if exists
-                if ($countryCode && isset($countries[strtoupper($countryCode)])) {
-                    $country = $countries[strtoupper($countryCode)];
-                    $flag = $country['flag'] ?? "🏳️";
-                    $countryName = $country['country'] ?? "Unknown";
-                }
+        $contentType = $type !== '' ? $upstream->header('Content-Type') : 'video/mp2t';
 
-                $channels[] = [
-                    'name' => $name,
-                    'url' => $url,
-                    'country_code' => $countryCode,
-                    'country_name' => $countryName,
-                    'flag' => $flag,
-                ];
+        return response($body, 200, [
+            'Content-Type' => $contentType,
+            'Cache-Control' => 'no-cache',
+            'Access-Control-Allow-Origin' => '*',
+        ]);
+    }
+
+    private function rewritePlaylist(string $body, string $base): string
+    {
+        $lines = preg_split("/\r\n|\n|\r/", $body);
+        $out = [];
+
+        foreach ($lines as $line) {
+            if ($line === '') {
+                $out[] = $line;
+                continue;
             }
+
+            if (str_starts_with($line, '#')) {
+                $out[] = preg_replace_callback('/URI="([^"]+)"/', function ($match) use ($base) {
+                    return 'URI="'.$this->proxyUrl($this->absoluteUrl($match[1], $base)).'"';
+                }, $line);
+                continue;
+            }
+
+            $out[] = $this->proxyUrl($this->absoluteUrl(trim($line), $base));
         }
 
-        return $channels;
+        return implode("\n", $out);
     }
 
-    private $blockedChannels = [
-        // france
-        '00s Replay', 'like Gecko Chrome/76.0.3809.25 Safari/537.36" group-title="News"', 'France 2 (1080p)', 'France 2 HD (720p)', 'France 3 HD (720p)', 
-        'France 4 HD (720p)', 'France 5 (1080p)', 'France 5 HD (720p)', 'France Inter', 'Franceinfo', 'Motorracing France', 'Rakuten TV Trailers France (720p)',
-        'TV5Monde France Belgique Suisse Monaco (1080p) [Geo-blocked]', 
-
-        // italy
-        '16 Anni e Incinta Italy (720p)', 'Andromeda Italy (720p)', 'Avatar La Leggenda di Aang Italy (720p)', 'BBC Doctor Who Italy (1080p)', 'Catfish TV Show Italy (720p)',
-        'Due Fantagenitori Italy (720p)', 'FailArmy Italy (720p)', 'Geordie Shore Italy (720p)', 'Il Banco dei Pugni Italy (720p)', 'Il Testimone Italy (720p)',
-        'Just for Laughs Italy (720p)', 'Le Sorelle McLeod Italy (720p)', 'Le Sorelle McLeod Italy (720p)', 'MacGyver Italy (720p)', 'Mai Dire Sì Italy (720p)', 
-        'Pimp My Ride Italy (720p)', 'Pluto TV Anime Italy (720p)', 'Pluto TV Cinema Italiano Italy (720p)', 'Pluto TV Cinema Italiano Italy (720p)', 'Pluto TV Crime Italy (720p)', 
-        'Pluto TV Documentary Italy (720p)', 'Pluto TV Film Azione Italy (720p)', 'Pluto TV Film Azione Italy (720p)', 'Pluto TV Film Classici Italy (720p)', 
-        'Pluto TV Film Commedia Italy (720p)', 'Pluto TV Film Drama Italy (720p)', 'Pluto TV Film Italy (720p)', 'Pluto TV Film Romantici Italy (720p)', 
-        'Pluto TV Film Thriller Italy (720p)', 'Pluto TV Horror Italy (720p)', 
-
-        // random guesses
-        'ABC 9 Orlando FL (WFTV) (720p)', 'Andorra TV (1080p)', 'Corporation de Télévision Brandon (CTB TV)', 'Kino Barrandov (720p)', 'MBC Andong (안동 MBC) (360p) [Not 24/7]',
-        'Resplandor TV (720p)', 'Shandong Education TV', 'SuperChannel Orlando (WACX-DT1) (720p)','Anytime TV (1080p)', 'Class CNBC', 'CNBC (720p)', 'CNBC Africa (480p)',
-        'CNBC Indonesia (720p)', 'CNBC TV18 Prime HD (1080p)', 'GNF TV (576p)', 'GOD TV Africa (576p)', 'Hilaal TV (576p)', 'Homebase TV (576p) [Not 24/7]', 'Hope4Life TV (720p)',
-        'Hope Channel Australia (1080p)', 'Hope Channel Bulgaria', 'Hope Channel Ghana (480p)', 'Hope Channel Norge (720p)', 'LN24SA (1080p)', 'LN247 (1080p)', '2M Monde', '3HD',
-        'como Gecko) Chrome/112.0.0.0 Mobile Safari/537.36" group-title="News"', '3Cat Exclusiu 2 (1080p) [Geo-blocked]', '3Cat Exclusiu 3 (1080p) [Geo-blocked]',
-        '3ABN TV Uganda (720p) [Not 24/7]', '8 Out of 10 Cats (1080p) [Geo-blocked]', '2STV', '1Music Channel Hungary (576p)',
-
-        // another italy
-        'Alkarma TV Praise (720p) [Not 24/7]', 'Channel 7 Ukraine (720p)', 'Charlotte aux Fraises', 'Little House on the Prairie', 'Praise Jesus Tower TV (480p)', 'Rai 1 HD (720p)', 
-        'Rai 2 (576p) [Geo-blocked]', 'Rai 2 HD', 'Rai 4 (576p) [Geo-blocked]', 'RAI 4K [Geo-blocked]', 'Rai 5 (576p) [Geo-blocked]', 'Rai Gulp (1080p)', 'Rai Gulp HD', 'RAI Italia Asia (576p)', 
-        'Rai Movie (576p) [Geo-blocked]', 'Rai News 24 (720p)', 'Rai News 24 HD', 'Rai Premium (1080p)', 'Rai Scuola (576p) [Geo-blocked]', 'Rai Scuola HD', 'Rai Sport 2', 'Rai Sport HD',
-        'Rai Storia (576p) [Geo-blocked]', 'Rai Storia HD', 'Rai Yoyo (1080p)', 'Raia TV (720p) [Not 24/7]', 'Rakuten TV Trailers Germany (1080p)', 'Rakuten TV Trailers Italy (1080p)',
-        'Rakuten TV Trailers Spain (1080p)', 'Rakuten TV Trailers UK (1080p)', 'TVR Craiova (1080p) [Geo-blocked]', 'Rakuten TV Family Movies Italy (1080p)', 'Rakuten TV Asian Cinema Italy (1080p)',
-        'Renegade Italy (720p)', 'Scherzi e risate Italy (720p)', 'Settimo Cielo Italy (720p)', 'South Park Italy (720p)', 'Squadra Speciale Cobra 11 Italy (720p)',
-        'Super! Brothers and Sisters Italy (720p)', 'Super! iCarly Italy (720p)', 'Super! Pop Italy (720p)', 'Super! Rugrats Italy (720p)', 'Super! Star Italy (720p)', 
-        'Super! Victorious Italy (720p)', 'Teen Mom Italy (720p)', 'Teenage Mutant Ninja Turtles Italy (720p)', 'VH1+ Music Legends Italy (720p)', 'VH1+ Rock Italy (720p)', 
-        'World Poker Tour Italy (720p)', 
-
-        // german
-        'Comedy & Shows Germany (1080p)', 'Germany Shore', 'Hope Channel German (1080p)', 'MyTime Movie Network Germany (1080p)', 'Nick Germany (1080p) [Geo-blocked]',
-        'QVC 2 Germany (540p)', 'QVC Style Germany (540p)', ''
-    ];
-
-    public function allChannels(Request $request)
+    private function proxyUrl(string $url): string
     {
-        $q = $request->query('q', '');
+        return route('stream.proxy', ['url' => $url]);
+    }
 
-       $path1 = public_path('index.m3u');
-
-        if (!file_exists($path1)) {
-            abort(500, 'index.m3u not found');
+    private function absoluteUrl(string $ref, string $base): string
+    {
+        if (preg_match('#^https?://#i', $ref)) {
+            return $ref;
         }
 
-        // ✅ Read as plain text
-        $m3uText = file_get_contents($path1);
-
-        $countries = json_decode(
-            file_get_contents(public_path('countries_metadata.json')),
-            true
-        );
-
-        // ✅ Parse directly
-        $channels = $this->parseM3u($m3uText, $countries);
-
-        // ❌ Block channels starting with "Pluto"
-        $channels = array_filter($channels, function ($channel) {
-            return !str_starts_with(
-                strtolower($channel['name']),
-                'pluto'
-            );
-        });
-
-        $channels = array_filter($channels, function ($channel) {
-            return !str_contains(
-                strtolower($channel['name']),
-                'gecko'
-            );
-        });
-
-        $channels = array_filter($channels, function ($channel) {
-            return !str_contains(
-                strtolower($channel['name']),
-                'blocked'
-            );
-        });
-
-        $channels = array_filter($channels, function($channel) {
-            return !in_array($channel['name'], $this->blockedChannels);
-        });
-
-        if ($q) {
-            $channels = array_filter($channels, fn($c) => str_contains(strtolower($c['name']), strtolower($q)));
+        $parts = parse_url($base);
+        $origin = ($parts['scheme'] ?? 'http').'://'.($parts['host'] ?? '');
+        if (! empty($parts['port'])) {
+            $origin .= ':'.$parts['port'];
         }
 
-        return view('channels', compact('channels'));
+        if (str_starts_with($ref, '/')) {
+            return $origin.$ref;
+        }
+
+        $dir = isset($parts['path']) ? preg_replace('#/[^/]*$#', '/', $parts['path']) : '/';
+
+        return $origin.$dir.$ref;
+    }
+
+    private function assertPublicHttp(string $url): void
+    {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            abort(400, 'Invalid stream url');
+        }
+
+        $parts = parse_url($url);
+        if (! in_array($parts['scheme'] ?? '', ['http', 'https'], true)) {
+            abort(400, 'Only http streams can be proxied');
+        }
+
+        $host = $parts['host'] ?? '';
+        $ip = gethostbyname($host);
+        if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            abort(403, 'Private stream hosts are blocked');
+        }
     }
 }
